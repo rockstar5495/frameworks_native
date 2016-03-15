@@ -43,7 +43,6 @@ namespace android {
 class InputDevice;
 class InputMapper;
 
-
 struct StylusState {
     /* Time the stylus event was received. */
     nsecs_t when;
@@ -877,6 +876,8 @@ private:
     uint32_t mSource;
     int32_t mKeyboardType;
 
+    bool mSwapKeys; // swap back with recents button
+
     std::vector<KeyDown> mKeyDowns; // keys that are down
     int32_t mMetaState;
     nsecs_t mDownTime; // time of most recent key down
@@ -909,6 +910,8 @@ private:
     void processKey(nsecs_t when, bool down, int32_t scanCode, int32_t usageCode);
 
     bool updateMetaStateIfNeeded(int32_t keyCode, bool down);
+
+    int getAdjustedKeyCode(int keyCode);
 
     ssize_t findKeyDown(int32_t scanCode);
 
