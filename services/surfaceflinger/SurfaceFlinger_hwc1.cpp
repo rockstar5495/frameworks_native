@@ -95,7 +95,7 @@
  */
 #define DEBUG_SCREENSHOTS   false
 
-EGLAPI const char* eglQueryStringImplementationANDROID(EGLDisplay dpy, EGLint name);
+extern "C" EGLAPI const char* eglQueryStringImplementationANDROID(EGLDisplay dpy, EGLint name);
 
 static int convertRotation(android::Transform::orientation_flags rotation)
 {
