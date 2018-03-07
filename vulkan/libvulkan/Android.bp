@@ -28,6 +28,7 @@ cc_library_shared {
     },
 
     cflags: [
+	"-O3",
         "-DLOG_TAG=\"vulkan\"",
         "-DVK_USE_PLATFORM_ANDROID_KHR",
         "-DVK_NO_PROTOTYPES",
