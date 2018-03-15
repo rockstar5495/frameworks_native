@@ -262,6 +262,14 @@ SurfaceFlinger::~SurfaceFlinger()
     eglTerminate(display);
 }
 
+void SurfaceFlinger::setTranslate(int x, int y){
+    for (size_t dpy = 0 ; dpy < mDisplays.size() ; dpy++)
+    {
+        const sp<DisplayDevice>& hw(mDisplays[dpy]);
+        hw->setTranslate(x, y);
+    }
+}
+
 void SurfaceFlinger::binderDied(const wp<IBinder>& /* who */)
 {
     // the window manager died on us. prepare its eulogy.
@@ -4143,6 +4151,14 @@ status_t SurfaceFlinger::onTransact(
             }
             case 1024: { // Is wide color gamut rendering/color management supported?
                 reply->writeBool(hasWideColorDisplay);
+                return NO_ERROR;
+            }
+            case 2020: {
+                int x = data.readInt32();
+                int y = data.readInt32();
+                setTranslate(x, y);
+                invalidateHwcGeometry();
+                repaintEverything();
                 return NO_ERROR;
             }
         }

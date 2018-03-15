@@ -113,7 +113,8 @@ DisplayDevice::DisplayDevice(
       mLayerStack(NO_LAYER_STACK),
       mOrientation(),
       mPowerMode(HWC_POWER_MODE_OFF),
-      mActiveConfig(0)
+      mActiveConfig(0),
+      translateX(0), translateY(0)
 {
     // clang-format on
     Surface* surface;
@@ -542,7 +543,7 @@ void DisplayDevice::setProjection(int orientation,
     const int w = mDisplayWidth;
     const int h = mDisplayHeight;
 
-    Transform R;
+    R.reset();
     DisplayDevice::orientationToTransfrom(orientation, w, h, &R);
 
     if (!frame.isValid()) {
@@ -570,7 +571,9 @@ void DisplayDevice::setProjection(int orientation,
 
     dirtyRegion.set(getBounds());
 
-    Transform TL, TP, S;
+    TL.reset();
+    TP.reset();
+    S.reset();
     float src_width  = viewport.width();
     float src_height = viewport.height();
     float dst_width  = frame.width();
@@ -588,10 +591,12 @@ void DisplayDevice::setProjection(int orientation,
     TL.set(-src_x, -src_y);
     TP.set(dst_x, dst_y);
 
+    Transform translate;
+    translate.set(translateX, translateY);
     // The viewport and frame are both in the logical orientation.
     // Apply the logical translation, scale to physical size, apply the
     // physical translation and finally rotate to the physical orientation.
-    mGlobalTransform = R * TP * S * TL;
+    mGlobalTransform = translate * R * TP * S * TL;
 
     const uint8_t type = mGlobalTransform.getType();
     mNeedsFiltering = (!mGlobalTransform.preserveRects() ||
@@ -627,6 +632,16 @@ void DisplayDevice::setProjection(int orientation,
 
 uint32_t DisplayDevice::getPrimaryDisplayOrientationTransform() {
     return sPrimaryDisplayOrientation;
+}
+
+void DisplayDevice::setTranslate(int x, int y) {
+    translateX = x;
+    translateY = y;
+
+    Transform translate;
+    translate.set(translateX, translateY);
+
+    mGlobalTransform = translate * R * TP * S * TL;
 }
 
 void DisplayDevice::dump(String8& result) const {

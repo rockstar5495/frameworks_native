@@ -129,6 +129,7 @@ public:
     void                    setLayerStack(uint32_t stack);
     void                    setDisplaySize(const int newWidth, const int newHeight);
     void                    setProjection(int orientation, const Rect& viewport, const Rect& frame);
+    void                    setTranslate(int x, int y);
 
     int                     getOrientation() const { return mOrientation; }
     uint32_t                getOrientationTransform() const;
@@ -278,6 +279,10 @@ private:
     // Fed to RenderEngine during composition.
     bool mDisplayHasWideColor;
 #endif
+
+    int translateX;
+    int translateY;
+    Transform R, TL, TP, S;
 };
 
 struct DisplayDeviceState {

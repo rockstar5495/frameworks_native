@@ -224,6 +224,8 @@ public:
     RenderEngine& getRenderEngine() const {
         return *mRenderEngine;
     }
+    
+    void setTranslate(int x, int y);
 
     bool authenticateSurfaceTextureLocked(
         const sp<IGraphicBufferProducer>& bufferProducer) const;
