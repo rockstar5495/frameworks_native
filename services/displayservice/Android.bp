@@ -42,5 +42,6 @@ cc_library_shared {
     cflags: [
         "-Werror",
         "-Wall",
+	"-O3",
     ]
 }
