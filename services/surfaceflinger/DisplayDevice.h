@@ -349,18 +349,18 @@ public:
                       Transform::orientation_flags rotation = Transform::ROT_0)
           : DisplayRenderArea(device, device->getBounds(), device->getWidth(), device->getHeight(),
                               rotation) {}
-    DisplayRenderArea(const sp<const DisplayDevice> device, Rect sourceCrop, uint32_t reqWidth,
-                      uint32_t reqHeight, Transform::orientation_flags rotation)
-          : RenderArea(reqWidth, reqHeight, CaptureFill::OPAQUE,
-                       getDisplayRotation(rotation, device->getInstallOrientation())),
-            mDevice(device),
-            mSourceCrop(sourceCrop) {}
+    DisplayRenderArea(const sp<const DisplayDevice> device, Rect sourceCrop, uint32_t reqHeight,
+                      uint32_t reqWidth, ISurfaceComposer::Rotation rotation,
+                      bool allowSecureLayers = true)
+          : RenderArea(reqHeight, reqWidth, CaptureFill::OPAQUE, rotation), mDevice(device),
+                              mSourceCrop(sourceCrop),
+                              mAllowSecureLayers(allowSecureLayers) {}
 
     const Transform& getTransform() const override { return mDevice->getTransform(); }
     Rect getBounds() const override { return mDevice->getBounds(); }
     int getHeight() const override { return mDevice->getHeight(); }
     int getWidth() const override { return mDevice->getWidth(); }
-    bool isSecure() const override { return mDevice->isSecure(); }
+    bool isSecure() const override { return mAllowSecureLayers && mDevice->isSecure();
 
     bool needsFiltering() const override {
         // check if the projection from the logical display to the physical
@@ -450,6 +450,7 @@ private:
 
     const sp<const DisplayDevice> mDevice;
     const Rect mSourceCrop;
+    const bool mAllowSecureLayers;
 };
 
 }; // namespace android
