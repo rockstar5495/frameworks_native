@@ -349,18 +349,20 @@ public:
                       Transform::orientation_flags rotation = Transform::ROT_0)
           : DisplayRenderArea(device, device->getBounds(), device->getWidth(), device->getHeight(),
                               rotation) {}
-    DisplayRenderArea(const sp<const DisplayDevice> device, Rect sourceCrop, uint32_t reqHeight,
-                      uint32_t reqWidth, ISurfaceComposer::Rotation rotation,
+    DisplayRenderArea(const sp<const DisplayDevice> device, Rect sourceCrop, uint32_t reqWidth,
+                      uint32_t reqHeight, Transform::orientation_flags rotation,
                       bool allowSecureLayers = true)
-          : RenderArea(reqHeight, reqWidth, CaptureFill::OPAQUE, rotation), mDevice(device),
-                              mSourceCrop(sourceCrop),
-                              mAllowSecureLayers(allowSecureLayers) {}
+          : RenderArea(reqWidth, reqHeight, CaptureFill::OPAQUE,
+                       getDisplayRotation(rotation, device->getInstallOrientation())),
+            mDevice(device),
+            mSourceCrop(sourceCrop),
+            mAllowSecureLayers(allowSecureLayers) {}
 
     const Transform& getTransform() const override { return mDevice->getTransform(); }
     Rect getBounds() const override { return mDevice->getBounds(); }
     int getHeight() const override { return mDevice->getHeight(); }
     int getWidth() const override { return mDevice->getWidth(); }
-    bool isSecure() const override { return mAllowSecureLayers && mDevice->isSecure();
+    bool isSecure() const override { return mAllowSecureLayers && mDevice->isSecure(); }
 
     bool needsFiltering() const override {
         // check if the projection from the logical display to the physical
@@ -381,16 +383,21 @@ public:
     }
 
     Rect getSourceCrop() const override {
-        // use the (projected) logical display viewport by default
+        // use the projected display viewport by default.
         if (mSourceCrop.isEmpty()) {
             return mDevice->getScissor();
         }
 
-        const int orientation = mDevice->getInstallOrientation();
-        if (orientation == DisplayState::eOrientationDefault) {
-            return mSourceCrop;
-        }
+        // Recompute the device transformation for the source crop.
+        Transform rotation;
+        Transform translatePhysical;
+        Transform translateLogical;
+        Transform scale;
+        const Rect& viewport = mDevice->getViewport();
+        const Rect& scissor = mDevice->getScissor();
+        const Rect& frame = mDevice->getFrame();
 
+        const int orientation = mDevice->getInstallOrientation();
         // Install orientation is transparent to the callers.  Apply it now.
         uint32_t flags = 0x00;
         switch (orientation) {
@@ -403,10 +410,17 @@ public:
             case DisplayState::eOrientation270:
                 flags = Transform::ROT_270;
                 break;
+            default:
+                break;
         }
-        Transform tr;
-        tr.set(flags, getWidth(), getHeight());
-        return tr.transform(mSourceCrop);
+        rotation.set(flags, getWidth(), getHeight());
+        translateLogical.set(-viewport.left, -viewport.top);
+        translatePhysical.set(scissor.left, scissor.top);
+        scale.set(frame.getWidth() / float(viewport.getWidth()), 0, 0,
+                  frame.getHeight() / float(viewport.getHeight()));
+        const Transform finalTransform =
+                rotation * translatePhysical * scale * translateLogical;
+        return finalTransform.transform(mSourceCrop);
     }
 
 private:

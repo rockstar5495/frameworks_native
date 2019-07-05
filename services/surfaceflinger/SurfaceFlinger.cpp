@@ -4787,8 +4787,9 @@ status_t SurfaceFlinger::captureScreen(const sp<IBinder>& display,
         }
     }
 
-    DisplayRenderArea renderArea(device, sourceCrop, reqWidth, reqHeight, renderAreaRotation, captureSecureLayers);
- 
+    DisplayRenderArea renderArea(device, sourceCrop, reqWidth, reqHeight, renderAreaRotation,
+                                 captureSecureLayers);
+
     auto traverseLayers = std::bind(std::mem_fn(&SurfaceFlinger::traverseLayersInDisplay), this,
                                     device, minLayerZ, maxLayerZ, std::placeholders::_1);
     return captureScreenCommon(renderArea, traverseLayers, outBuffer, useIdentityTransform,
