@@ -39,13 +39,6 @@ cc_defaults {
 cc_library {
     name: "libcompositionengine",
     defaults: ["libcompositionengine_defaults"],
-    product_variables: {
-        xtended: {
-            target_uses_fod_hack: {
-                cflags: ["-DTARGET_USES_FOD_HACK"],
-            },
-        },
-    },
     srcs: [
         "src/CompositionEngine.cpp",
         "src/Display.cpp",
