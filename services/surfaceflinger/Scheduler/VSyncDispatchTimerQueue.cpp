@@ -243,8 +243,7 @@ void VSyncDispatchTimerQueue::timerCallback() {
     std::vector<Invocation> invocations;
     {
         std::lock_guard<decltype(mMutex)> lk(mMutex);
-        auto const now = mTimeKeeper->now();
-        mLastTimerCallback = now;
+        mLastTimerCallback = mTimeKeeper->now();
         for (auto it = mCallbacks.begin(); it != mCallbacks.end(); it++) {
             auto& callback = it->second;
             auto const wakeupTime = callback->wakeupTime();
@@ -252,8 +251,7 @@ void VSyncDispatchTimerQueue::timerCallback() {
                 continue;
             }
 
-            auto const lagAllowance = std::max(now - mIntendedWakeupTime, static_cast<nsecs_t>(0));
-            if (*wakeupTime < mIntendedWakeupTime + mTimerSlack + lagAllowance) {
+            if (*wakeupTime < mIntendedWakeupTime + mTimerSlack) {
                 callback->executing();
                 invocations.emplace_back(
                         Invocation{callback, *callback->lastExecutedVsyncTarget(), *wakeupTime});
