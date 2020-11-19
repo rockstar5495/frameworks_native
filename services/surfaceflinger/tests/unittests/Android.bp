@@ -58,7 +58,6 @@ cc_test {
         "RegionSamplingTest.cpp",
         "TimeStatsTest.cpp",
         "FrameTracerTest.cpp",
-        "TimerTest.cpp",
         "TransactionApplicationTest.cpp",
         "StrongTypingTest.cpp",
         "VSyncDispatchTimerQueueTest.cpp",
